@@ -3,7 +3,7 @@
 
 sample_conf__DEFAULT__name1='this is a test' \
 sample_conf__DEFAULT__name2=val2 \
-sample_conf__deprecated__name3__delete=1 \
-sample_conf__deprecated__name4__delete=1 \
+delete__sample_conf__deprecated__name3=1 \
+delete__sample_conf__junk=1 \
 python iniconfigurator.py "$@" sample.conf > sample.conf.new
 

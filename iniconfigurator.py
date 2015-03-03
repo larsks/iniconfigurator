@@ -42,12 +42,8 @@ def apply(cfg, environ, prefix):
     keys in `environ` to `cfg`.'''
 
     for k, v in environ.items():
-        if not k.startswith(prefix):
-            continue
-
-        LOG.debug('considering: %s', k)
-
-        try:
+        if k.startswith(prefix):
+            LOG.debug('considering: %s', k)
             _, section, option = k.split('__')
             if not cfg.has_section(section) and section != 'DEFAULT':
                 cfg.add_section(section)
@@ -62,15 +58,26 @@ def apply(cfg, environ, prefix):
                      option,
                      v,
                      oldv)
-        except ValueError:
-            _, section, option, action = k.split('__')
-            if action == 'delete':
+        elif k.startswith('delete__%s' % prefix):
+            LOG.debug('considering: %s', k)
+            try:
+                action, _, section, option = k.split('__')
+            except ValueError:
+                action, _, section, = k.split('__')
+                option = None
+
+            if option is not None:
+                if cfg.has_option(section, option):
+                    cfg.remove_option(section, option)
+                    LOG.info('delete option %s/%s',
+                             section,
+                             option)
+            else:
                 if cfg.has_section(section):
-                    if cfg.has_option(section, option):
-                        cfg.remove_option(section, option)
-                        LOG.info('delete %s/%s',
-                                 section,
-                                 option)
+                    cfg.remove_section(section)
+                    LOG.info('delete section %s',
+                             section)
+
 
 
 def read_config(src):
